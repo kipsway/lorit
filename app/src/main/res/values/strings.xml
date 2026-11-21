@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Lorit</string>
+    <string name="vpn_service_title">Сетевое ядро Lorit активно</string>
+    <string name="vpn_service_desc">Бесперебойная связь с нейросетями</string>
+</resources>

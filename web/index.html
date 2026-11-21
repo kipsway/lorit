@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorit AI — Нативный Android AI-Хаб со встроенным VPN</title>
+  <meta name="description" content="Единый нативный клиент для GPT-4o, Claude 3.7, Gemini и DeepSeek в стиле Google Gemini с встроенным обходом блокировок и шифрованием SQLCipher.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            amoled: '#000000',
+            surface: {
+              DEFAULT: '#0E1013',
+              card: '#16191E',
+              border: '#232730',
+              hover: '#1F242B'
+            },
+            accent: {
+              DEFAULT: '#8AB4F8',
+              hover: '#ADC8FF',
+              glow: 'rgba(138, 180, 248, 0.15)',
+              purple: '#D0BCFF',
+              emerald: '#81C784'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #050608;
+      color: #E2E8F0;
+      overflow-x: hidden;
+    }
+    .glow-blur {
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .capsule-shadow {
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7), 0 0 20px 0 rgba(138, 180, 248, 0.1);
+    }
+    .code-glow {
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+    /* Плавная прокрутка */
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body class="selection:bg-accent/30 selection:text-white">
+
+  <!-- Фоновые градиенты -->
+  <div class="glow-blur bg-blue-600/15 top-[-100px] left-1/2 -translate-x-1/2"></div>
+  <div class="glow-blur bg-purple-600/10 top-[600px] right-[-100px]"></div>
+  <div class="glow-blur bg-emerald-600/10 top-[1400px] left-[-100px]"></div>
+
+  <!-- Навигация -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-surface/80 border-b border-surface-border">
+    <div class="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- Логотип со звездой Gemini/Lorit -->
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-accent to-accent-purple flex items-center justify-center shadow-lg shadow-accent/20">
+          <svg class="w-6 h-6 text-[#050608]" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z"/>
+          </svg>
+        </div>
+        <span class="text-2xl font-bold tracking-tight text-white">Lorit <span class="text-xs uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">AI</span></span>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+        <a href="#features" class="hover:text-accent transition">Возможности</a>
+        <a href="#preview" class="hover:text-accent transition">Интерфейс</a>
+        <a href="#architecture" class="hover:text-accent transition">Ядро и VPN</a>
+        <a href="#faq" class="hover:text-accent transition">FAQ</a>
+      </nav>
+
+      <a href="#download" class="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-accent text-[#050608] font-semibold text-sm hover:bg-accent-hover transition shadow-md shadow-accent/20">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span>Скачать APK</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-24 pb-20 px-6 max-w-5xl mx-auto text-center">
+    <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-surface-card border border-surface-border text-xs text-slate-300 mb-8 backdrop-blur-md">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span>Версия 1.0.0 • Поддержка Android 8.0 — 15+</span>
+    </div>
+
+    <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
+      Все ИИ в одном нативном клиенте.<br>
+      <span class="bg-gradient-to-r from-accent via-accent-purple to-pink-300 bg-clip-text text-transparent">
+        Без блокировок и шума.
+      </span>
+    </h1>
+
+    <p class="max-w-2xl mx-auto text-lg sm:text-xl text-slate-400 font-normal leading-relaxed mb-10">
+      Строгий дизайн в стиле Google Gemini, встроенное ядро <strong class="text-white">sing-box VPN</strong> для прямого доступа к OpenAI, Claude, DeepSeek и Google AI, аппаратное шифрование и оффлайн-очередь.
+    </p>
+
+    <!-- Кнопки действий -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+      <a href="https://github.com/kipsway/lorit/releases/latest/download/Lorit-AI.apk" class="w-full sm:w-auto inline-flex items-center justify-center space-x-3 px-8 py-4 rounded-2xl bg-white text-[#050608] font-bold text-base hover:bg-slate-200 transition shadow-xl shadow-white/10 group">
+        <svg class="w-5 h-5 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span>Установить Lorit APK (32 МБ)</span>
+      </a>
+
+      <a href="https://github.com/kipsway/lorit" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-4 rounded-2xl bg-surface-card border border-surface-border text-slate-200 font-semibold text-base hover:bg-surface-hover transition">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        <span>Исходный код (GitHub)</span>
+      </a>
+    </div>
+
+    <!-- Чипы провайдеров -->
+    <div class="flex flex-wrap items-center justify-center gap-3 text-xs font-medium text-slate-400">
+      <span class="px-3 py-1.5 rounded-full bg-surface-card border border-surface-border">⚡ OpenAI GPT-4o & o3-mini</span>
+      <span class="px-3 py-1.5 rounded-full bg-surface-card border border-surface-border">🧠 Claude 3.7 Sonnet (Thinking)</span>
+      <span class="px-3 py-1.5 rounded-full bg-surface-card border border-surface-border">✨ Gemini 2.0 Flash (1M Tokens)</span>
+      <span class="px-3 py-1.5 rounded-full bg-surface-card border border-surface-border">🔮 DeepSeek R1 & V3</span>
+    </div>
+  </section>
+
+  <!-- Интерактивный превью экрана приложения -->
+  <section id="preview" class="max-w-4xl mx-auto px-6 mb-28">
+    <div class="relative rounded-3xl bg-surface-card border border-surface-border shadow-2xl overflow-hidden capsule-shadow">
+      
+      <!-- Верхняя панель приложения -->
+      <div class="px-6 py-4 border-b border-surface-border flex items-center justify-between bg-surface/50">
+        <div class="flex items-center space-x-3">
+          <button class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-surface-border transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <!-- Селектор модели -->
+          <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-surface-border/60 text-white font-semibold text-sm cursor-pointer hover:bg-surface-border transition">
+            <span id="activeModelBadge">Claude 3.7 Sonnet</span>
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <!-- Индикатор VPN ядра -->
+          <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>VPN Core: 24 ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Чат и сообщения -->
+      <div class="p-6 space-y-6 min-h-[380px] bg-[#0A0C0F]">
+        <!-- Сообщение пользователя -->
+        <div class="flex justify-end">
+          <div class="max-w-[80%] rounded-2xl rounded-tr-sm bg-accent/15 border border-accent/25 px-5 py-3.5 text-slate-100 text-sm leading-relaxed">
+            Сравни алгоритмическую сложность поиска в ширину (BFS) и Дейкстры с приоритетной очередью.
+          </div>
+        </div>
+
+        <!-- Ответ ассистента -->
+        <div class="flex justify-start">
+          <div class="max-w-[95%] space-y-3">
+            <!-- Блок размышлений -->
+            <div class="rounded-xl bg-surface-card border border-surface-border p-3 text-xs text-slate-400">
+              <div class="flex items-center justify-between font-medium cursor-pointer">
+                <div class="flex items-center space-x-2 text-accent">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  <span>Размышления • 6 сек</span>
+                </div>
+                <span class="text-slate-500">[Развернуто]</span>
+              </div>
+              <p class="mt-2 text-slate-500 font-mono text-[11px] leading-relaxed">
+                Анализирую структуры графов: BFS работает для невзвешенных графов за O(V + E). Алгоритм Дейкстры использует min-heap приоритетную очередь...
+              </p>
+            </div>
+
+            <!-- Тело ответа -->
+            <div class="text-sm text-slate-200 leading-relaxed space-y-3">
+              <p>Вот точное сопоставление сложности алгоритмов:</p>
+              <div class="p-3.5 rounded-xl bg-surface-card border border-surface-border font-mono text-xs text-slate-300">
+                1. <strong>BFS (Поиск в ширину):</strong> O(V + E), где V — вершины, E — ребра.<br>
+                2. <strong>Дейкстра (Min-Heap):</strong> O((V + E) \cdot \log V).
+              </div>
+            </div>
+
+            <!-- 4 действия под ответом -->
+            <div class="flex items-center space-x-2 pt-1 text-slate-400 text-xs">
+              <button class="p-2 rounded-lg hover:bg-surface-card hover:text-white transition" title="Копировать чистый текст">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </button>
+              <button class="p-2 rounded-lg hover:bg-surface-card hover:text-white transition" title="Поделиться">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              </button>
+              <button class="p-2 rounded-lg hover:bg-surface-card hover:text-white transition" title="Перегенерировать">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </button>
+              <button class="p-2 rounded-lg hover:bg-surface-card hover:text-white transition" title="Сравнить с другой моделью">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Плавающая капсула ввода (28dp) -->
+      <div class="p-4 bg-surface/90 border-t border-surface-border">
+        <div class="rounded-full bg-surface-card border border-surface-border px-4 py-2.5 flex items-center space-x-3 shadow-lg">
+          <button class="p-1.5 rounded-full hover:bg-surface-border text-slate-400 hover:text-white transition" title="Прикрепить файл">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </button>
+          
+          <button class="p-1.5 rounded-full bg-accent/20 text-accent hover:bg-accent/30 transition" title="Поиск в интернете (Глобус)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+          </button>
+
+          <input type="text" placeholder="Спросить что угодно..." class="bg-transparent flex-1 text-sm text-white placeholder-slate-500 focus:outline-none" value="" readonly>
+
+          <button class="p-2 rounded-full bg-accent text-[#050608] hover:bg-accent-hover transition shadow-md shadow-accent/20">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 6 ключевых преимуществ Lorit -->
+  <section id="features" class="max-w-6xl mx-auto px-6 mb-28">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Инженерия без компромиссов</h2>
+      <p class="text-slate-400">Каждая деталь Lorit спроектирована для максимальной скорости, эстетики и автономности.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <!-- Карточка 1 -->
+      <div class="p-6 rounded-3xl bg-surface-card border border-surface-border hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-accent flex items-center justify-center mb-5 border border-blue-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Встроенный In-App VPN sing-box</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Никаких сторонних VPN-приложений или значков «ключа» в шторке. Сетевое ядро Go/C маршрутизирует запросы напрямую через VLESS, VMess и Trojan с авто-переключением серверов.
+        </p>
+      </div>
+
+      <!-- Карточка 2 -->
+      <div class="p-6 rounded-3xl bg-surface-card border border-surface-border hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-accent-purple flex items-center justify-center mb-5 border border-purple-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Мультипровайдерный хаб</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Официальные аккаунты ChatGPT, Claude, Gemini, DeepSeek или ваши собственные API-ключи. Динамический опрос моделей и автоматический даунгрейд при исчерпании лимитов.
+        </p>
+      </div>
+
+      <!-- Карточка 3 -->
+      <div class="p-6 rounded-3xl bg-surface-card border border-surface-border hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-5 border border-emerald-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Локальный парсинг документов</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Мгновенное извлечение текста из DOCX (через встроенный распаковщик XML), PDF, CSV и кода. Никакой отправки файлов на сторонние парсеры — всё происходит на устройстве.
+        </p>
+      </div>
+
+      <!-- Карточка 4 -->
+      <div class="p-6 rounded-3xl bg-surface-card border border-surface-border hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-5 border border-amber-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Side-Sheet Браузер и «Глобус»</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Выдвижная колонка справа на 10 вкладок. Весь веб-трафик идет через прокси. Кнопка «Глобус» автоматически скармливает открытую страницу в контекст нейросети.
+        </p>
+      </div>
+
+      <!-- Карточка 5 -->
+      <div class="p-6 rounded-3xl bg-surface-card border border-surface-border hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-5 border border-rose-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">SQLCipher & Режим Инкогнито</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          База данных Room зашифрована AES-256 с ключом в Android KeyStore. Временные чаты работают исключительно в оперативной памяти (RAM) и стираются без следа.
+        </p>
+      </div>
+
+      <!-- Карточка 6 -->
+      <div class="p-6 rounded-3xl bg-surface-card border border-surface-border hover:border-slate-600 transition">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-5 border border-indigo-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Очередь Outbox и FTS5-поиск</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Отправляйте сообщения в метро или самолете — они встанут в защищенную очередь Outbox и автоматически отправятся, как только вернется связь.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Инструкция по установке -->
+  <section id="download" class="max-w-4xl mx-auto px-6 mb-28">
+    <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-surface-card to-surface border border-surface-border text-center">
+      <h2 class="text-3xl font-extrabold text-white mb-4">Установка в 3 простых шага</h2>
+      <p class="text-slate-400 max-w-xl mx-auto mb-10">Lorit распространяется как независимый APK без слежки маркетов и ограничений цензуры.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left mb-10">
+        <div class="p-5 rounded-2xl bg-surface border border-surface-border">
+          <span class="text-xs font-bold text-accent font-mono uppercase">Шаг 1</span>
+          <h4 class="font-bold text-white mt-1 mb-1">Скачайте APK</h4>
+          <p class="text-xs text-slate-400">Нажмите кнопку скачивания ниже или получите файл из нашего канала.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface border border-surface-border">
+          <span class="text-xs font-bold text-accent font-mono uppercase">Шаг 2</span>
+          <h4 class="font-bold text-white mt-1 mb-1">Разрешите установку</h4>
+          <p class="text-xs text-slate-400">При запросе Android разрешите установку из вашего браузера или проводника.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface border border-surface-border">
+          <span class="text-xs font-bold text-accent font-mono uppercase">Шаг 3</span>
+          <h4 class="font-bold text-white mt-1 mb-1">Начните диалог</h4>
+          <p class="text-xs text-slate-400">Встроенный VPN уже настроен и готов к работе «из коробки».</p>
+        </div>
+      </div>
+
+      <div class="inline-flex flex-col sm:flex-row items-center gap-4">
+        <a href="https://github.com/kipsway/lorit/releases/latest/download/Lorit-AI.apk" class="inline-flex items-center space-x-3 px-8 py-4 rounded-2xl bg-accent text-[#050608] font-bold text-base hover:bg-accent-hover transition shadow-lg shadow-accent/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <span>Скачать Lorit APK v1.0.0</span>
+        </a>
+      </div>
+      <p class="text-xs text-slate-500 mt-4">Размер файла: ~32 МБ • Контрольная сумма SHA-256 проверена</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="max-w-3xl mx-auto px-6 mb-28">
+    <h2 class="text-2xl sm:text-3xl font-bold text-white text-center mb-10">Часто задаваемые вопросы</h2>
+    <div class="space-y-4">
+      
+      <div class="p-5 rounded-2xl bg-surface-card border border-surface-border">
+        <h4 class="font-semibold text-white mb-2">Нужно ли включать сторонний VPN перед входом?</h4>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Нет! В Lorit встроено полнофункциональное сетевое ядро sing-box с поддержкой современных протоколов VLESS Reality, VMess, Trojan и Shadowsocks. Приложение само автоматически туннелирует трафик к серверам OpenAI, Claude, Gemini и DeepSeek.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface-card border border-surface-border">
+        <h4 class="font-semibold text-white mb-2">Где хранятся мои API-ключи и переписки?</h4>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          Исключительно на вашем телефоне. База данных диалогов зашифрована стойким алгоритмом SQLCipher (AES-256), а кодовая фраза и API-ключи защищены аппаратным модулем безопасности Android KeyStore.
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface-card border border-surface-border">
+        <h4 class="font-semibold text-white mb-2">Как работает кнопка «Глобус»?</h4>
+        <p class="text-sm text-slate-400 leading-relaxed">
+          При активации кнопки «Глобус» нейросеть принудительно задействует поиск в сети интернет и анализирует открытые вкладки встроенного Side-Sheet браузера, извлекая только полезный текст статей без рекламы.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Подвал -->
+  <footer class="border-t border-surface-border py-12 px-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-400">Lorit AI</span>
+        <span>— Нативный Android AI-клиент</span>
+      </div>
+      <p>© 2026 Lorit Project. Распространяется свободно под лицензией MIT.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
